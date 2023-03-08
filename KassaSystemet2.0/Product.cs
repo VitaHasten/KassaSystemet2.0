@@ -24,8 +24,22 @@ namespace KassaSystemet2._0
 
         public int GetId() { return _productId; }
         public decimal GetPrice() { return _price; }
+        public decimal GetThePrice(int productId) { return _price; }
+
         public enhet GetEnhet() { return _enhet; }
         public string GetProductName() { return _productName;}
+        public string GetTheProductName(int productId) { return _productName; }
+
+        public void SetProductName(string newProductName)
+        {
+            _productName=newProductName;
+        }
+
+        public void SetProductPrice(decimal newProductPrice)
+        {
+            _price = newProductPrice;
+        }
+        
     }
 }
 
