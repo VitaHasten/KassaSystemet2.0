@@ -8,20 +8,24 @@ namespace KassaSystemet2._0
 {
     public class Receipt
     {
-        public Receipt(DateTime paymentNumber, int produktKodCashier, string productName, decimal quantityCashier, decimal payment)
+        public Receipt(DateTime paymentNumber, int produktKodCashier, string productName, int quantityCashier, decimal eachPrice, decimal payment, decimal totalSum)
         {
-            paymentNumber = _paymentNumber;
-            produktKodCashier = _produktKodCashier;
-            productName = _productName;
-            quantityCashier = _quantityCashier;
-            payment = _payment;
+            _paymentNumber = paymentNumber;
+            _produktKodCashier = produktKodCashier;
+            _productName = productName;
+            _quantityCashier = quantityCashier;
+            _payment = payment;
+            _eachPrice = eachPrice;
+            _totalSum = totalSum;
         }
 
-        private DateTime _paymentNumber;
-        private int _produktKodCashier;
-        private string _productName;
-        private decimal _quantityCashier;
-        private decimal _payment;
+        private DateTime _paymentNumber { get; set; }
+        private int _produktKodCashier { get; set; }
+        private string _productName { get; set; }
+        private int _quantityCashier { get; set; }
+        private decimal _payment { get; set; }
+        private decimal _eachPrice { get; set; }
+        private decimal _totalSum { get; set; }
 
         public DateTime GetRecieptNumber()
         {
@@ -38,7 +42,7 @@ namespace KassaSystemet2._0
             return _productName;
         }
 
-        public decimal GetQuantityCashier()
+        public int GetQuantityCashier()
         {
             return _quantityCashier;
         }
@@ -46,6 +50,16 @@ namespace KassaSystemet2._0
         public decimal GetPayment()
         {
             return _payment;
+        }
+
+        public decimal GetTotalSum()
+        {
+            return _totalSum;
+        }
+
+        public decimal GetEachPrice()
+        {
+            return _eachPrice;
         }
     }
 }

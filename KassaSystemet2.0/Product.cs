@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace KassaSystemet2._0
 {
-    public enum enhet { Styckpris, Kilopris}
+    public enum Enhet { Styckpris, Kilopris}
     public class Product
     {
-        public Product(int productId, string productName, decimal price, enhet enhet )
+        public Product(int productId, string productName, decimal price, Enhet enhet )
         {
             _productId=productId;
             _productName=productName;
@@ -19,14 +19,14 @@ namespace KassaSystemet2._0
 
         private int _productId { get; set; }
         private decimal _price { get; set; }
-        private enhet _enhet { get; set; }
+        private Enhet _enhet { get; set; }
         private string _productName { get; set; }
 
         public int GetId() { return _productId; }
         public decimal GetPrice() { return _price; }
         public decimal GetThePrice(int productId) { return _price; }
 
-        public enhet GetEnhet() { return _enhet; }
+        public Enhet GetEnhet() { return _enhet; }
         public string GetProductName() { return _productName;}
         public string GetTheProductName(int productId) { return _productName; }
 
