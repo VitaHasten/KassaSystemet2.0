@@ -332,31 +332,23 @@ namespace KassaSystemet2._0
         }
         void Cashier()
         {
+            paymentNumber = GetDateNow();
             Console.WriteLine("KASSA");
-            Console.WriteLine($"KVITTO\t{GetDateNow()}");
+            Console.WriteLine($"KVITTO\t{paymentNumber}");
             string fullString = "";
             string checkInput = "";
             decimal totalSum = 0;
-            paymentNumber = GetDateNow();
+            int integer1 = 0;
+            int integer2 = 0;
+            
             while (true)
             {
                 Console.Write("\nAnge produktkod mellanslag antal: ");
                 checkInput = Console.ReadLine();
-                if (IsTheInputCorrect(checkInput, totalSum))
-                {
-                    fullString = checkInput.ToUpper();
-                }
-                
-                int mellanslagsIndex = fullString.IndexOf(" ");
-                string produktKodString = fullString[..mellanslagsIndex];
-                string quantityCashierString = fullString[(mellanslagsIndex + 1)..];
-
-                int produktKodCashier = int.Parse(produktKodString);
-                var correctInputCode = InputProductCheck(produktKodCashier);
-                int quantityCashier = int.Parse(quantityCashierString);
-                var name = GetTheName(InputProductCheck(produktKodCashier));
-                var eachPrice = CheckCampaign(InputProductCheck(produktKodCashier));
-                var payment = GetTheSum(InputProductCheck(produktKodCashier), quantityCashier);
+                (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
+                var name = GetTheName(produktKodCashier);
+                var eachPrice = CheckCampaign(produktKodCashier);
+                var payment = GetTheSum(produktKodCashier, quantityCashier);
                 
                 totalSum += payment;
 
@@ -373,22 +365,8 @@ namespace KassaSystemet2._0
                 Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
             }
         }
-        int InputProductCheck(int produktKodCashier)
-        {
-            int correctProductCode = 0;
-            if (productList.Any(product => product.GetId() == produktKodCashier))
-            {
-                correctProductCode = produktKodCashier;
-            }
-            else 
-            {
-                Console.Write("\nAnge produktkod mellanslag antal: ");
-                InputProductCheck(int.Parse(Console.ReadLine()));
-            }
-            return correctProductCode;
-        }
-
-        bool IsTheInputCorrect(string checkInput, decimal totalSum)
+       
+        (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
         {
             if (checkInput.ToUpper() == "PAY")
             {
@@ -399,7 +377,7 @@ namespace KassaSystemet2._0
                 Console.WriteLine("\nFELAKTIG INMATNING");
                 Console.Write("\nAnge produktkod mellanslag antal: ");
                 checkInput = Console.ReadLine();
-                IsTheInputCorrect(checkInput, totalSum);
+                GetTwoIntegers(checkInput, totalSum);
             }
 
             int mellanslagsIndex = checkInput.IndexOf(" ");
@@ -411,7 +389,7 @@ namespace KassaSystemet2._0
                 if (!Char.IsDigit(c))
                 {
                     Console.WriteLine("DU SKREV INTE IN EN SIFFRA");
-                    return false;
+                    continue;
                 }
             }
 
@@ -420,10 +398,22 @@ namespace KassaSystemet2._0
                 if (!Char.IsDigit(c))
                 {
                     Console.WriteLine("DU SKREV INTE IN EN SIFFRA");
-                    return false;
+                    continue;
                 }
             }
-            return true;
+
+            int integer1 = int.Parse(inputDigits1);
+            int integer2 = int.Parse(inputDigits2);
+
+            if (!productList.Any(product => product.GetId() == integer1))
+            {
+                Console.WriteLine("\nFELAKTIG INMATNING");
+                Console.Write("\nAnge produktkod mellanslag antal: ");
+                checkInput = Console.ReadLine();
+                GetTwoIntegers(checkInput, totalSum);
+            }
+           
+            return (integer1, integer2);
         }
         decimal GetTheSum(int produktKodCashier, int quantity)
         {
@@ -672,9 +662,13 @@ namespace KassaSystemet2._0
                 if (p.CampaignId() == remove)
                 {
                     productsOnCampaignList.RemoveAt(i);
+                    Console.WriteLine("\nKampanjen borttagen, tryck valfri tangent för att återgå till huvudmenyn.");
+                }
+                else
+                {
+                    Console.WriteLine("\nFelaktig inmatning. Du skickas åter till huvudmenyn.");
                 }
             }
-            Console.WriteLine("Kampanjen borttagen, tryck valfri tangent för att återgå till huvudmenyn.");
             Console.ReadKey();
         }
 
@@ -764,7 +758,6 @@ namespace KassaSystemet2._0
             }
             return result;
         }
-
 
         int CheckInt()
         {
