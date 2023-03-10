@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -365,56 +366,56 @@ namespace KassaSystemet2._0
                 Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
             }
         }
-       
+
         (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
         {
-            if (checkInput.ToUpper() == "PAY")
-            {
-                Receipt(totalSum);
-            }
-            if (!checkInput.Contains(" "))
-            {
-                Console.WriteLine("\nFELAKTIG INMATNING");
-                Console.Write("\nAnge produktkod mellanslag antal: ");
-                checkInput = Console.ReadLine();
-                GetTwoIntegers(checkInput, totalSum);
-            }
+            bool validInput = false;
+            int integer1 = 0;
+            int integer2 = 0;
 
-            int mellanslagsIndex = checkInput.IndexOf(" ");
-            string inputDigits1 = checkInput[..mellanslagsIndex];
-            string inputDigits2 = checkInput[(mellanslagsIndex + 1)..];
-
-            foreach (char c in inputDigits1)
+            while (!validInput)
             {
-                if (!Char.IsDigit(c))
+                if (checkInput.ToUpper() == "PAY")
                 {
-                    Console.WriteLine("DU SKREV INTE IN EN SIFFRA");
+                    Receipt(totalSum);
+                }
+                if (!checkInput.Contains(" "))
+                {
+                    Console.WriteLine("\nFELAKTIG INMATNING");
+                    Console.Write("\nAnge produktkod mellanslag antal: ");
+                    checkInput = Console.ReadLine();
                     continue;
                 }
-            }
 
-            foreach (char c in inputDigits2)
-            {
-                if (!Char.IsDigit(c))
+                int mellanslagsIndex = checkInput.IndexOf(" ");
+                string inputDigits1 = checkInput[..mellanslagsIndex];
+                string inputDigits2 = checkInput[(mellanslagsIndex + 1)..];
+
+                if (!int.TryParse(inputDigits1, out integer1) || !int.TryParse(inputDigits2, out integer2))
                 {
-                    Console.WriteLine("DU SKREV INTE IN EN SIFFRA");
+                    Console.WriteLine("\nFELAKTIG INMATNING");
+                    Console.Write("\nAnge produktkod mellanslag antal: ");
+                    checkInput = Console.ReadLine();
                     continue;
                 }
+                
+                integer1 = int.Parse(inputDigits1);
+                integer2 = int.Parse(inputDigits2);
+
+                if (!productList.Any(product => product.GetId() == integer1))
+                {
+                    Console.WriteLine("\nFELAKTIG INMATNING");
+                    Console.Write("\nAnge produktkod mellanslag antal: ");
+                    checkInput = Console.ReadLine();
+                    continue; 
+                }
+
+                validInput = true;
             }
 
-            int integer1 = int.Parse(inputDigits1);
-            int integer2 = int.Parse(inputDigits2);
-
-            if (!productList.Any(product => product.GetId() == integer1))
-            {
-                Console.WriteLine("\nFELAKTIG INMATNING");
-                Console.Write("\nAnge produktkod mellanslag antal: ");
-                checkInput = Console.ReadLine();
-                GetTwoIntegers(checkInput, totalSum);
-            }
-           
             return (integer1, integer2);
         }
+
         decimal GetTheSum(int produktKodCashier, int quantity)
         {
             var theSum = CheckCampaign(produktKodCashier) * quantity;
