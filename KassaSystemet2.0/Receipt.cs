@@ -27,15 +27,15 @@ namespace KassaSystemet2._0
         private decimal _eachPrice { get; set; }
         private decimal _totalSum { get; set; }
 
-        public DateTime GetRecieptNumber()
-        {
-            return _paymentNumber;
-        }
+        //public DateTime GetRecieptNumber()
+        //{
+        //    return _paymentNumber;
+        //}
 
-        public decimal GetProduktKodCashier()
-        {
-            return _produktKodCashier;
-        }
+        //public decimal GetProduktKodCashier()
+        //{
+        //    return _produktKodCashier;
+        //}
 
         public string GetProductName()
         {
@@ -52,10 +52,10 @@ namespace KassaSystemet2._0
             return _payment;
         }
 
-        public decimal GetTotalSum()
-        {
-            return _totalSum;
-        }
+        //public decimal GetTotalSum()
+        //{
+        //    return _totalSum;
+        //}
 
         public decimal GetEachPrice()
         {
