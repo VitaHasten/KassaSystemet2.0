@@ -20,25 +20,5 @@ namespace KassaSystemet2._0
             private int _kvittoNummer { get; set; }
             private DateTime _paymentNumber { get; set; }
             private decimal _totalSum { get; set; }
-
-            //public int GetKvittoNummer()
-            //{
-            //    return _kvittoNummer;
-            //}
-
-            //public DateTime GetRecieptNumber()
-            //{
-            //    return _paymentNumber;
-            //}
-                   
-            //public decimal GetTotalSum()
-            //{
-            //    return _totalSum;
-            //}
-
-            //public List<Receipt> GetList()
-            //{
-            //    return _receiptLines;
-            //}   
         }
 }

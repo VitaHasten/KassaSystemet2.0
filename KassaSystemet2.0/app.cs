@@ -13,10 +13,14 @@ namespace KassaSystemet2._0
 {
     public class App
     {
+        Files files = new();
+        InputControls inputControls = new();
+        Campaigns campaigns = new();
         public void Run()
         {
             AddingStartupProducts();
-            Load();
+            files.AddFilesIfNotExisting();
+            files.Load();
             MainMenu();
         }
         
@@ -24,11 +28,10 @@ namespace KassaSystemet2._0
         static List<Product> productList = new List<Product>();
         List<Receipt> receiptList = new List<Receipt>();
         List<Receipt> completeReceiptList = new List<Receipt>();
-        static List<Campaign> productsOnCampaignList = new List<Campaign>();
-        int freeId = GetFreeId();
-        int freeCampaignId = GetFreeCampaignId();
-        static int receiptNumber = 0;
         static List<CompleteReceipts> ListOfAllReceipts = new List<CompleteReceipts>();
+        int freeId = GetFreeId();
+        static int receiptNumber = 0;
+        bool cashierDone = false;
 
         void AddingStartupProducts()
         {
@@ -58,119 +61,95 @@ namespace KassaSystemet2._0
             freeId = GetFreeId();
             newProduct = new Product(freeId, "Apelsiner", 33.45M, Enhet.Kilopris);
             productList.Add(newProduct);
-                    }
-
-        StringBuilder Load()
-        {
-            StringBuilder receiptsFromFile = new StringBuilder();
-            using (var sr = new StreamReader("ReceiptFile.txt"))
-            {
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    receiptsFromFile.AppendLine(line);
-                }
-                return receiptsFromFile;
-            }
         }
-
-        void MainMenu()
+                
+        public void MainMenu()
         {
-            Console.WriteLine("***KASSASYSTEMET***\n");
-            Console.WriteLine("1. Adminmeny");
-            Console.WriteLine("2. Kassan");
-            Console.WriteLine("3. Kontrollera kvitton\n");
-            Console.WriteLine("9. AVSLUTA\n");
-                        
-            switch (ReadIntForMainMeny())
+            while (true)
             {
-                case 1:
-                    Console.Clear();
-                    AdminMenu();
-                    break;
-                case 2:
-                    Console.Clear();
-                    Cashier();
-                    break;
-                case 3:
-                    Console.Clear();
-                    Console.WriteLine(Load());
-                    Console.WriteLine("Tryck valfri tangent för att återgå till föregående meny.");
-                    Console.ReadKey();
-                    Console.Clear();
-                    MainMenu();
-                    break;
-                case 9:
-                    Environment.Exit(0);
-                    break;
+                Console.Clear();
+                Console.WriteLine("***KASSASYSTEMET***\n");
+                Console.WriteLine("1. Adminmeny");
+                Console.WriteLine("2. Kassan");
+                Console.WriteLine("3. Kontrollera kvitton\n");
+                Console.WriteLine("9. AVSLUTA\n");
+
+                switch (inputControls.ReadIntForMainMeny())
+                {
+                    case 1:
+                        Console.Clear();
+                        AdminMenu();
+                        break;
+                    case 2:
+                        Console.Clear();
+                        Cashier();
+                        break;
+                    case 3:
+                        Console.Clear();
+                        Console.WriteLine(files.Load());
+                        Console.Write("Tryck valfri tangent för att återgå till föregående meny.");
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
+                    case 9:
+                        Environment.Exit(0);
+                        break;
+                }
             }
         }
 
         void AdminMenu()
         {
-            Console.WriteLine("***KASSASYSTEMET ADMINMENY***\n");
-            Console.WriteLine("   PRODUKTER");
-            Console.WriteLine("-------------------------------");
-            Console.WriteLine("1. Lägg till ny produkt");
-            Console.WriteLine("2. Redigera befintlig produkt\n");
-            Console.WriteLine("   KAMPANJER");
-            Console.WriteLine("-------------------------------");
-            Console.WriteLine("3. Lägg till ny kampanj");
-            Console.WriteLine("4. Ta bort kampanj");
-            Console.WriteLine("5. Visa aktiva kampanjer\n");
-            Console.WriteLine("   ÅTERGÅ");
-            Console.WriteLine("-------------------------------");
-            Console.WriteLine("9. Huvudmeny\n");
-
-            switch (ReadIntForAdminMeny())
+            bool breakTheLoop = false;
+            while (breakTheLoop != true)
             {
-                case 1:
-                    Console.Clear();
-                    AddProductByUser();
-                    break;
-                case 2:
-                    EditProduct();
-                    break;
-                case 3:
-                    Console.Clear();
-                    AddCampaign();
-                    Console.Clear();
-                    break;
-                case 4:
-                    Console.Clear();
-                    RemoveCampaign();
-                    Console.Clear();
-                    MainMenu();
-                    break;
-                case 5:
-                    ActiveCampaigns();
-                    Console.WriteLine("Tryck på valfri tangent för att återgå till huvudmenyn.");
-                    Console.ReadKey();
-                    Console.Clear();
-                    MainMenu();
-                    break;
+                Console.WriteLine("***KASSASYSTEMET ADMINMENY***\n");
+                Console.WriteLine("   PRODUKTER");
+                Console.WriteLine("-------------------------------");
+                Console.WriteLine("1. Lägg till ny produkt");
+                Console.WriteLine("2. Redigera befintlig produkt\n");
+                Console.WriteLine("   KAMPANJER");
+                Console.WriteLine("-------------------------------");
+                Console.WriteLine("3. Lägg till ny kampanj");
+                Console.WriteLine("4. Ta bort kampanj");
+                Console.WriteLine("5. Visa aktiva kampanjer\n");
+                Console.WriteLine("   ÅTERGÅ");
+                Console.WriteLine("-------------------------------");
+                Console.WriteLine("9. Huvudmeny\n");
 
-                case 9:
-                    Console.Clear();
-                    MainMenu();
-                    break;
+                switch (inputControls.ReadIntForAdminMeny())
+                {
+                    case 1:
+                        Console.Clear();
+                        AddProductByUser();
+                        break;
+                    case 2:
+                        EditProduct();
+                        break;
+                    case 3:
+                        Console.Clear();
+                        campaigns.AddCampaign(productList);
+                        Console.Clear();
+                        break;
+                    case 4:
+                        Console.Clear();
+                        campaigns.RemoveCampaign();
+                        Console.Clear();
+                        break;
+                    case 5:
+                        campaigns.ActiveCampaigns();
+                        Console.WriteLine("Tryck på valfri tangent för att återgå till huvudmenyn.");
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
+                    case 9:
+                        Console.Clear();
+                        breakTheLoop = true;
+                        break;
+                }
             }
         }
-
-        void AddProductByUser()
-        {
-            Console.Write("***LÄGG TILL NY PRODUKT***\n\nProduktnamn: ");
-            string? productName = Console.ReadLine();
-            Console.Write("Pris: ");
-            decimal price =CheckDecimalInput();
-            var enheten =GetEnhet();
-            var freeId = GetFreeId();
-            var newProduct = new Product(freeId, productName, price, enheten);
-            productList.Add(newProduct);
-            Console.WriteLine("\nPRODUKTEN SPARAD. ÅTER TILL HUVUDMENYN\n");
-            MainMenu();
-        }
-
+                
         static int GetFreeId()
         {
             if (productList.Any(p => p.GetId() > 0)) 
@@ -182,20 +161,8 @@ namespace KassaSystemet2._0
                 return 1; 
             }
         }
-
-        static int GetFreeCampaignId()
-        {
-            if (productsOnCampaignList.Any(p => p.CampaignId() > 0))
-            {
-                return productsOnCampaignList.Max(p => p.CampaignId()) + 1;
-            }
-            else
-            {
-                return 1;
-            }
-        }
-
-        Enhet GetEnhet()
+        
+        public Enhet GetEnhet()
         {
             bool inputOK = false;
             Enhet enhet = Enhet.Styckpris;
@@ -223,183 +190,7 @@ namespace KassaSystemet2._0
 
             return enhet;
         }
-
-        //void ShowProductList()
-        //{
-        //    Console.Clear();
-        //    Console.WriteLine("------------------------------------------------");
-        //    Console.WriteLine(" ID  | Produktnamn       | Pris      | Enhet     ");
-        //    Console.WriteLine("------------------------------------------------");
-        //    foreach (var showProductList in productList)
-        //    {
-        //        Console.Write(String.Format("{0,-4} | {1,-17} | {2,9} | {3,5}",
-        //            " " + showProductList.GetId(), showProductList.GetProductName(), showProductList.GetPrice() + " kr", showProductList.GetEnhet() + "\n"));
-        //    }
-        //    Console.WriteLine("------------------------------------------------\n\nTryck ENTER för att återgå till huvudmenyn.");
-        //    Console.ReadLine();
-        //    Console.Clear();
-        //    MainMenu();
-        //}
-
-        void EditProduct()
-        {
-            Console.Clear();
-            Console.Write($"Ange produkt-ID som du vill ändra (1-{GetHighestProductID()}): ");
-            var inputID = CheckInt();
-            while (inputID < 1 || inputID > GetHighestProductID())
-            {
-                if (inputID < 1 || inputID > GetHighestProductID())
-                {
-                    Console.Write($"Felaktig inmating. Produkt-ID måste vara mellan 1-{GetHighestProductID()}: ");
-                    inputID = CheckInt();
-                }
-            }
                         
-            foreach (var findItem in productList)
-            {
-                if (inputID == findItem.GetId())
-                {
-                    Console.WriteLine($"\nID: {findItem.GetId()}\nNAMN: {findItem.GetProductName()}\nPRIS: {findItem.GetPrice()} kr\n");
-                }
-            }
-
-            Console.WriteLine("Vad vill du ändra? \n1. Namn\n2. Pris\n\n3.Återgå\n");
-            var inputChoice = CheckInt();
-
-            if (inputChoice < 1 || inputChoice > 3)
-            {
-                while (inputChoice < 1 || inputChoice > 3)
-                {
-                    Console.Write("Felaktig inmatning. Välj 1, 2 eller 3: ");
-                    inputChoice = CheckInt();
-                }
-            }
-
-            if (inputChoice == 1)
-            {
-                Console.Write("Nytt produktnamn: ");
-                var productname = Console.ReadLine();
-                foreach (var product in productList)
-                {
-                    if (inputID == product.GetId())
-                    {
-                        product.SetProductName(productname);
-                        Console.Clear();
-                        AdminMenu();
-                    }
-                }
-            }
-            else if (inputChoice == 2)
-            {
-                Console.Write("Nytt pris: ");
-                decimal price = CheckDecimalInput();
-                foreach (var product in productList)
-                {
-                    if (inputID == product.GetId())
-                    {
-                        product.SetProductPrice(price);
-                        Console.Clear();
-                        AdminMenu();
-                    }
-                }
-            }
-            else if (inputChoice == 3)
-            {
-                Console.Clear();
-                AdminMenu();
-            }
-
-            
-        }
-        void Cashier()
-        {
-            paymentNumber = GetDateNow();
-            Console.WriteLine("KASSA");
-            Console.WriteLine($"KVITTO\t{paymentNumber}");
-            string? checkInput = "";
-            decimal totalSum = 0;
-                        
-            while (true)
-            {
-                Console.Write("\nAnge produktkod mellanslag antal: ");
-                checkInput = Console.ReadLine();
-                (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
-                var name = GetTheName(produktKodCashier);
-                var eachPrice = CheckCampaign(produktKodCashier);
-                var payment = GetTheSum(produktKodCashier, quantityCashier);
-                totalSum += payment;
-
-                var newReceiptLine = new Receipt(paymentNumber, produktKodCashier, name, quantityCashier, eachPrice, payment, totalSum);
-                receiptList.Add(newReceiptLine);
-                Console.Clear();
-                Console.WriteLine("KASSA");
-                Console.WriteLine($"KVITTO\t{paymentNumber}");
-
-                foreach (var receiptLines in receiptList)
-                {
-                    Console.WriteLine($"{receiptLines.GetProductName()} {receiptLines.GetQuantityCashier()} * {receiptLines.GetEachPrice().ToString("N2")} = {receiptLines.GetPayment().ToString("N2")}");
-                }
-                Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
-            }
-        }
-
-        void SaveKvittonummerToFile(CompleteReceipts completeReceipts, DateTime dateTime, decimal totalSum)
-        {
-            int receiptNumberFromFile = 0;
-
-            var srRecNr = new StreamReader("ReceiptCounter.txt");
-            using (srRecNr)
-            {
-                if (srRecNr.Peek() == -1)
-                {
-                    receiptNumberFromFile = 0;
-                }
-                else
-                {
-                    receiptNumberFromFile = int.Parse(srRecNr.ReadToEnd())+1;
-                }
-            }
-
-
-            var swRecNr = new StreamWriter("ReceiptCounter.txt", false);
-            using (swRecNr)
-            {
-                swRecNr.WriteLine(receiptNumberFromFile);
-            }
-
-            var sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine($"KVITTONUMMER: {receiptNumberFromFile}");
-                sw.WriteLine("");
-                sw.WriteLine($"{dateTime}");
-                sw.WriteLine("");
-            }
-            
-            foreach (var receiptLine in receiptList)
-            {
-                SaveReceiptLinesToFile(receiptLine);
-            }
-            
-            sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine("");
-                sw.WriteLine($"Total: {totalSum.ToString("N2")} kr");
-                sw.WriteLine("-----------------------");
-                sw.WriteLine("");
-            }
-        }
-
-        void SaveReceiptLinesToFile(Receipt receipt)
-        {
-            var sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine($"{receipt.GetProductName()} {receipt.GetQuantityCashier()} * {receipt.GetEachPrice().ToString("N2")} = {receipt.GetPayment().ToString("N2")}");
-            }
-        }
-
         (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
         {
             bool validInput = false;
@@ -449,13 +240,13 @@ namespace KassaSystemet2._0
             return (integer1, integer2);
         }
 
-        decimal GetTheSum(int produktKodCashier, int quantity)
+        public decimal GetTheSum(int produktKodCashier, int quantity)
         {
-            var theSum = CheckCampaign(produktKodCashier) * quantity;
+            var theSum = campaigns.CheckCampaign(produktKodCashier) * quantity;
             return theSum;
         }
 
-        decimal GetThePrice(int produktKodCashier)
+        public decimal GetThePrice(int produktKodCashier)
         {
             foreach (var price in productList)
             {
@@ -469,7 +260,7 @@ namespace KassaSystemet2._0
             return 0;
         }
 
-        string GetTheName(int produktKodCashier)
+        public string GetTheName(int produktKodCashier)
         {
             foreach (var name in productList)
             {
@@ -481,7 +272,7 @@ namespace KassaSystemet2._0
             return "fel";
         }
                 
-        int GetHighestProductID()
+        public int GetHighestProductID()
         {
             int highestProduktID = 0;
             foreach (var ID in productList)
@@ -496,262 +287,147 @@ namespace KassaSystemet2._0
             return highestProduktID;
         }
 
-        DateTime GetDateNow()
+        public DateTime GetDateNow()
         {
             var dateNow = DateTime.Now;
             return dateNow;
         }
 
-        void Receipt(decimal totalSum)
+        void AddProductByUser()
         {
-            receiptNumber++;
-            completeReceiptList.AddRange(receiptList);
-            var completeReceipt = new CompleteReceipts(receiptNumber, paymentNumber, totalSum, receiptList);
-            SaveKvittonummerToFile(completeReceipt, GetDateNow(), totalSum);
-            ListOfAllReceipts.Add(completeReceipt);
-            receiptList.Clear();
-            Console.Clear();
-            MainMenu();
-        }
-
-        void AddCampaign()
-        {
-            Console.Write($"Artikelnummer som kampanjen ska appliceras på (1-{GetHighestProductID()}): ");
-
-            var produktKodCashier = CheckInt();
-
-            while (produktKodCashier < 1 || produktKodCashier > GetHighestProductID())
-            {
-                if (produktKodCashier < 1 || produktKodCashier > GetHighestProductID())
-                {
-                    Console.Write($"\nFelaktigt produkt-ID. Mata in ett produkt-ID mellan 1 - {GetHighestProductID()}: ");
-                    produktKodCashier = int.Parse(Console.ReadLine());
-                    Console.WriteLine();
-                }
-                Console.Clear();
-            }
-            DateTime todayDT = GetDateNow();
-            DateOnly today = new DateOnly(todayDT.Year, todayDT.Month, todayDT.Day);
-
-            Console.WriteLine("--------------------------------------------------------");
-            Console.WriteLine(" ID  | Produktnamn    | Ordinariepris  | Enhet          ");
-            Console.WriteLine("--------------------------------------------------------");
-            foreach (var showProductList in productList)
-            {
-                if (produktKodCashier == showProductList.GetId())
-                {
-                    Console.Write(String.Format("{0,-4} | {1,-14} | {2,-14} | {3,5}",
-                                        " " + showProductList.GetId(), showProductList.GetProductName(), showProductList.GetPrice() + " kr", showProductList.GetEnhet() + "\n"));
-                }
-            }
-            Console.WriteLine("--------------------------------------------------------\n");
-            Console.Write("Kampanjens startdatum (YYYY-MM-DD): ");
-
-            string dateString = "";
-            DateOnly startingDate = CheckDateInput(dateString);
-
-            while (startingDate < today)
-            {
-                if (startingDate < today)
-                {
-                    Console.Write("\nStartdatumet du matade in har redan passerat. Mata in dagens datum eller senare: ");
-                    dateString = Console.ReadLine();
-                    startingDate = DateOnly.Parse(dateString);
-                    Console.WriteLine();
-                }
-            }
-
-            Console.Write("Kampanjens slutdatum  (YYYY-MM-DD): ");
-            DateOnly endingDate = CheckDateInput(dateString);
-            
-            while (endingDate <= today)
-            {
-                if (endingDate <= today)
-                {
-                    Console.Write("\nSlutdatumet du matade in har redan passerat. Mata in ett korrekt slutdatum: ");
-                    dateString = Console.ReadLine();
-                    endingDate = DateOnly.Parse(dateString);
-                    Console.WriteLine();
-                }
-            }
-
-            while (endingDate <= startingDate)
-            {
-                if (endingDate <= startingDate)
-                {
-                    Console.Write($"\nSlutdatumet du matade in inträffar innan kampanjen har startat. Mata in ett slutdatum efter {startingDate}: ");
-                    dateString = Console.ReadLine();
-                    endingDate = DateOnly.Parse(dateString);
-                    Console.WriteLine();
-                }
-            }
-
-            Console.Write("Kampanjpris: ");
-            decimal campaingPrice = decimal.Parse(Console.ReadLine());
-
-            freeCampaignId= GetFreeCampaignId();
-
-            var campaignProduct = new Campaign(freeCampaignId, produktKodCashier, campaingPrice, startingDate, endingDate);
-            productsOnCampaignList.Add(campaignProduct);
-
-            Console.WriteLine($"\nPriset ändrat till {campaingPrice} kr.\n");
-            Console.WriteLine("Tryck valfri tangent för att återgå till huvudmenyn.");
-            Console.ReadLine();
-            Console.Clear();
-            MainMenu();
-        }
-
-        decimal CheckCampaign(int produktKodCashier)
-        {
-
-            var today = DateOnly.FromDateTime(DateTime.Now);
-            foreach (var c in productsOnCampaignList)
-            {
-                if (c.GetCampaignProductId() == produktKodCashier && today > c.GetStartDate() && today < c.GetEndDate())
-                {
-                    return c.GetCampaignPrice(); 
-                }
-            }
-            return GetThePrice(produktKodCashier);
-        }
-        void ActiveCampaigns()
-        {
-            Console.Clear();
-            Console.WriteLine("AKTIVA KAMPANJER:\n");
-            foreach (var items in productsOnCampaignList)
-            {
-                Console.WriteLine($"KampanjID:   {items.CampaignId()}\nProduktkod:  {items.GetCampaignProductId()}\nKampanjpris: {items.GetCampaignPrice()}\nStartdatum:  {items.GetStartDate()}\nSlutdatum:   {items.GetEndDate()}\n");
-            }
-            if (productsOnCampaignList.Count() == 0)
-            {
-                Console.WriteLine("INGA AKTIVA KAMPANJER!\n");
-            }
-        }
-
-        void RemoveCampaign()
-        {
-            if (productsOnCampaignList.Count() == 0)
-            {
-                Console.WriteLine("INGA AKTIVA KAMPANJER!\n");
-                Console.WriteLine("Tryck valfri tangent för att återgå till huvudmenyn.");
-                Console.ReadKey();
-                return;
-            }
-            ActiveCampaigns();
-            Console.Write("Mata in kampanj-ID på den kampanj som ska tas bort: ");
-            var remove = CheckInt();
-            
-            for (int i = productsOnCampaignList.Count - 1; i >= 0; i--)
-            {
-                var p = productsOnCampaignList[i];
-                if (p.CampaignId() == remove)
-                {
-                    productsOnCampaignList.RemoveAt(i);
-                    Console.WriteLine("\nKampanjen borttagen, tryck valfri tangent för att återgå till huvudmenyn.");
-                }
-                else
-                {
-                    Console.WriteLine("\nFelaktig inmatning. Du skickas åter till huvudmenyn.");
-                }
-            }
-            Console.ReadKey();
-        }
-
-        DateOnly CheckDateInput(string dateString)
-        {
-            DateOnly startingDate= new DateOnly();
             while (true)
             {
-                dateString = Console.ReadLine();
-                if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+                Console.Write("***LÄGG TILL NY PRODUKT***\n\nProduktnamn: ");
+                string? productName = Console.ReadLine();
+                Console.Write("Pris: ");
+                decimal price = inputControls.CheckDecimalInput();
+                var enheten = GetEnhet();
+                var freeId = GetFreeId();
+                var newProduct = new Product(freeId, productName, price, enheten);
+                productList.Add(newProduct);
+                Console.WriteLine("\nPRODUKTEN SPARAD. ÅTER TILL HUVUDMENYN\n");
+                break;
+            }
+        }
+        
+        void EditProduct()
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.Write($"Ange produkt-ID som du vill ändra (1-{GetHighestProductID()}): ");
+                var inputID = inputControls.CheckInt();
+                while (inputID < 1 || inputID > GetHighestProductID())
                 {
-                    startingDate = new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
-                    return startingDate;
+                    if (inputID < 1 || inputID > GetHighestProductID())
+                    {
+                        Console.Write($"Felaktig inmating. Produkt-ID måste vara mellan 1-{GetHighestProductID()}: ");
+                        inputID = inputControls.CheckInt();
+                    }
                 }
-                else
+
+                foreach (var findItem in productList)
                 {
-                    Console.Write("\nFelaktig inmatning. Mata in datumet i formatet YYYY-MM-DD: ");
+                    if (inputID == findItem.GetId())
+                    {
+                        Console.WriteLine($"\nID: {findItem.GetId()}\nNAMN: {findItem.GetProductName()}\nPRIS: {findItem.GetPrice()} kr\n");
+                    }
                 }
+
+                Console.WriteLine("Vad vill du ändra? \n1. Namn\n2. Pris\n\n3.Återgå\n");
+                var inputChoice = inputControls.CheckInt();
+
+                if (inputChoice < 1 || inputChoice > 3)
+                {
+                    while (inputChoice < 1 || inputChoice > 3)
+                    {
+                        Console.Write("Felaktig inmatning. Välj 1, 2 eller 3: ");
+                        inputChoice = inputControls.CheckInt();
+                    }
+                }
+
+                if (inputChoice == 1)
+                {
+                    Console.Write("Nytt produktnamn: ");
+                    var productname = Console.ReadLine();
+                    foreach (var product in productList)
+                    {
+                        if (inputID == product.GetId())
+                        {
+                            product.SetProductName(productname);
+                            Console.Clear();
+                            break;
+                        }
+                    }
+                }
+                else if (inputChoice == 2)
+                {
+                    Console.Write("Nytt pris: ");
+                    decimal price = inputControls.CheckDecimalInput();
+                    foreach (var product in productList)
+                    {
+                        if (inputID == product.GetId())
+                        {
+                            product.SetProductPrice(price);
+                            Console.Clear();
+                            break;
+                        }
+                    }
+                }
+                else if (inputChoice == 3)
+                {
+                    Console.Clear();
+                    break;
+                }
+                break;
             }
         }
 
-        int ReadIntForMainMeny()
+        void Cashier()
         {
-            int val = 0;
-            string exit = "";
-            while (exit != "exit")
+            paymentNumber = GetDateNow();
+            Console.WriteLine("KASSA");
+            Console.WriteLine($"KVITTO\t{paymentNumber}");
+            string? checkInput = "";
+            decimal totalSum = 0;
+            
+            while (cashierDone != true)
             {
-                if (!int.TryParse(Console.ReadLine(), out val))
+                Console.Write("\nAnge produktkod mellanslag antal: ");
+                checkInput = Console.ReadLine();
+                (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
+                var name = GetTheName(produktKodCashier);
+                var eachPrice = campaigns.CheckCampaign(produktKodCashier);
+                var payment = GetTheSum(produktKodCashier, quantityCashier);
+                totalSum += payment;
+
+                var newReceiptLine = new Receipt(paymentNumber, produktKodCashier, name, quantityCashier, eachPrice, payment, totalSum);
+                receiptList.Add(newReceiptLine);
+                Console.Clear();
+                Console.WriteLine("KASSA");
+                Console.WriteLine($"KVITTO\t{paymentNumber}");
+
+                foreach (var receiptLines in receiptList)
                 {
-                    Console.WriteLine("\nDu skrev inte in ett heltal. Försök igen.\n");
-                    continue;
+                    Console.WriteLine($"{receiptLines.GetProductName()} {receiptLines.GetQuantityCashier()} * {receiptLines.GetEachPrice().ToString("N2")} = {receiptLines.GetPayment().ToString("N2")}");
                 }
-                if (val != 1 && val != 2 && val != 3 && val != 4 && val != 9)
-                {
-                    Console.WriteLine("\nFelaktig inmatning. Ditt val måste vara 1, 2, 3, 4 eller 9.\n");
-                    continue;
-                }
-                exit = "exit";
+                Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
             }
-            return val;
         }
 
-        int ReadIntForAdminMeny()
+        bool Receipt(decimal totalSum)
         {
-            int val = 0;
-            string exit = "";
-            while (exit != "exit")
+            while (true)
             {
-                if (!int.TryParse(Console.ReadLine(), out val))
-                {
-                    Console.WriteLine("\nDu skrev inte in ett heltal. Försök igen.\n");
-                    continue;
-                }
-                if (val != 1 && val != 2 && val != 3 && val != 4 && val != 5 && val != 9)
-                {
-                    Console.WriteLine("\nFelaktig inmatning. Ditt val måste vara 1, 2, 3, 4, 5 eller 9.\n");
-                    continue;
-                }
-                exit = "exit";
+                receiptNumber++;
+                completeReceiptList.AddRange(receiptList);
+                var completeReceipt = new CompleteReceipts(receiptNumber, paymentNumber, totalSum, receiptList);
+                files.SaveKvittonummerToFile(completeReceipt, GetDateNow(), totalSum, receiptList);
+                ListOfAllReceipts.Add(completeReceipt);
+                receiptList.Clear();
+                Console.Clear();
+                return cashierDone = true;                
             }
-            return val;
-        }
-
-        decimal CheckDecimalInput()
-        {
-            decimal result = 0;
-            bool inputOK = false;
-            while (!inputOK)
-            {
-                string inputString = Console.ReadLine();
-                if (!decimal.TryParse(inputString, out result))
-                {
-                    Console.Write("Felaktig inmatning. Försök igen: ");
-                }
-                else if (result < 1)
-                {
-                    Console.Write("Priset kan aldrig vara lägre än 1 kr. Mata in korrekt pris: ");
-                }
-                else if (result > 9999)
-                {
-                    Console.Write("Ledningen har beslutat att inte sälja produkter till priser från 10 000 kr och uppåt. Mata in ett lägre pris: ");
-                }
-                else
-                {
-                    inputOK = true;
-                }
-            }
-            return result;
-        }
-
-        int CheckInt()
-        {
-            int heltal = 0;
-            while (int.TryParse(Console.ReadLine(), out heltal) == false)
-            {
-                Console.Write("Du skrev inte in ett heltal. Försök igen: ");
-            }
-            return heltal;
         }
     }
 }

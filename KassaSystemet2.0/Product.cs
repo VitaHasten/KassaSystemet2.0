@@ -39,7 +39,6 @@ namespace KassaSystemet2._0
         {
             _price = newProductPrice;
         }
-        
     }
 }
 
