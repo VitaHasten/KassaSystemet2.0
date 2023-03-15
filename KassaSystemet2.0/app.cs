@@ -16,6 +16,7 @@ namespace KassaSystemet2._0
         public void Run()
         {
             AddingStartupProducts();
+            AddFilesIfNotExisting();
             Load();
             MainMenu();
         }
@@ -60,22 +61,9 @@ namespace KassaSystemet2._0
             productList.Add(newProduct);
                     }
 
-        StringBuilder Load()
-        {
-            StringBuilder receiptsFromFile = new StringBuilder();
-            using (var sr = new StreamReader("ReceiptFile.txt"))
-            {
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    receiptsFromFile.AppendLine(line);
-                }
-                return receiptsFromFile;
-            }
-        }
-
         void MainMenu()
         {
+            Console.Clear();
             Console.WriteLine("***KASSASYSTEMET***\n");
             Console.WriteLine("1. Adminmeny");
             Console.WriteLine("2. Kassan");
@@ -224,23 +212,6 @@ namespace KassaSystemet2._0
             return enhet;
         }
 
-        //void ShowProductList()
-        //{
-        //    Console.Clear();
-        //    Console.WriteLine("------------------------------------------------");
-        //    Console.WriteLine(" ID  | Produktnamn       | Pris      | Enhet     ");
-        //    Console.WriteLine("------------------------------------------------");
-        //    foreach (var showProductList in productList)
-        //    {
-        //        Console.Write(String.Format("{0,-4} | {1,-17} | {2,9} | {3,5}",
-        //            " " + showProductList.GetId(), showProductList.GetProductName(), showProductList.GetPrice() + " kr", showProductList.GetEnhet() + "\n"));
-        //    }
-        //    Console.WriteLine("------------------------------------------------\n\nTryck ENTER för att återgå till huvudmenyn.");
-        //    Console.ReadLine();
-        //    Console.Clear();
-        //    MainMenu();
-        //}
-
         void EditProduct()
         {
             Console.Clear();
@@ -342,64 +313,7 @@ namespace KassaSystemet2._0
                 Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
             }
         }
-
-        void SaveKvittonummerToFile(CompleteReceipts completeReceipts, DateTime dateTime, decimal totalSum)
-        {
-            int receiptNumberFromFile = 0;
-
-            var srRecNr = new StreamReader("ReceiptCounter.txt");
-            using (srRecNr)
-            {
-                if (srRecNr.Peek() == -1)
-                {
-                    receiptNumberFromFile = 0;
-                }
-                else
-                {
-                    receiptNumberFromFile = int.Parse(srRecNr.ReadToEnd())+1;
-                }
-            }
-
-
-            var swRecNr = new StreamWriter("ReceiptCounter.txt", false);
-            using (swRecNr)
-            {
-                swRecNr.WriteLine(receiptNumberFromFile);
-            }
-
-            var sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine($"KVITTONUMMER: {receiptNumberFromFile}");
-                sw.WriteLine("");
-                sw.WriteLine($"{dateTime}");
-                sw.WriteLine("");
-            }
-            
-            foreach (var receiptLine in receiptList)
-            {
-                SaveReceiptLinesToFile(receiptLine);
-            }
-            
-            sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine("");
-                sw.WriteLine($"Total: {totalSum.ToString("N2")} kr");
-                sw.WriteLine("-----------------------");
-                sw.WriteLine("");
-            }
-        }
-
-        void SaveReceiptLinesToFile(Receipt receipt)
-        {
-            var sw = new StreamWriter("ReceiptFile.txt", true);
-            using (sw)
-            {
-                sw.WriteLine($"{receipt.GetProductName()} {receipt.GetQuantityCashier()} * {receipt.GetEachPrice().ToString("N2")} = {receipt.GetPayment().ToString("N2")}");
-            }
-        }
-
+                
         (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
         {
             bool validInput = false;
@@ -752,6 +666,95 @@ namespace KassaSystemet2._0
                 Console.Write("Du skrev inte in ett heltal. Försök igen: ");
             }
             return heltal;
+        }
+
+        public StringBuilder Load()
+        {
+            StringBuilder receiptsFromFile = new StringBuilder();
+
+            var test = File.ReadLines("ReceiptFile.txt").ToList();
+
+            if (test.Count() == 0)
+            {
+                Console.WriteLine("INGA EXISTERANDE KVITTON");
+            }
+
+            using (var sr = new StreamReader("ReceiptFile.txt"))
+            {
+                string line = "";
+                while ((line = sr.ReadLine()) != null)
+                {
+                    receiptsFromFile.AppendLine(line);
+                }
+                return receiptsFromFile;
+            }
+        }
+
+        public void AddFilesIfNotExisting()
+        {
+            if (!File.Exists("ReceiptCounter.txt"))
+            {
+                using (FileStream fs = File.Create("ReceiptCounter.txt"))
+                using (StreamWriter sw = new StreamWriter(fs))
+                {
+                    sw.WriteLine("0");
+                }
+            }
+
+            if (!File.Exists("ReceiptFile.txt"))
+            {
+                using (FileStream fs = File.Create("ReceiptFile.txt")) ;
+            }
+        }
+
+        public void SaveKvittonummerToFile(CompleteReceipts completeReceipts, DateTime dateTime, decimal totalSum)
+        {
+            int receiptNumberFromFile = 0;
+
+            var srRecNr = new StreamReader("ReceiptCounter.txt");
+            using (srRecNr)
+            {
+                receiptNumberFromFile = int.Parse(srRecNr.ReadToEnd()) + 1;
+            }
+
+
+            var swRecNr = new StreamWriter("ReceiptCounter.txt", false);
+            using (swRecNr)
+            {
+                swRecNr.WriteLine(receiptNumberFromFile);
+            }
+
+            var sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine($"KVITTONUMMER: {receiptNumberFromFile}");
+                sw.WriteLine("");
+                sw.WriteLine($"{dateTime}");
+                sw.WriteLine("");
+            }
+
+            foreach (var receiptLine in receiptList)
+            {
+                SaveReceiptLinesToFile(receiptLine);
+            }
+
+            sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine("");
+                sw.WriteLine($"Total: {totalSum.ToString("N2")} kr");
+                sw.WriteLine("-----------------------");
+                sw.WriteLine("");
+            }
+        }
+
+        public void SaveReceiptLinesToFile(Receipt receipt)
+        {
+            var sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine($"{receipt.GetProductName()} {receipt.GetQuantityCashier()} * {receipt.GetEachPrice().ToString("N2")} = {receipt.GetPayment().ToString("N2")}");
+            }
         }
     }
 }
