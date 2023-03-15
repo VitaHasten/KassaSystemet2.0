@@ -190,7 +190,166 @@ namespace KassaSystemet2._0
 
             return enhet;
         }
+
+        void EditProduct()
+        {
+            Console.Clear();
+            Console.Write($"Ange produkt-ID som du vill ändra (1-{GetHighestProductID()}): ");
+            var inputID = CheckInt();
+            while (inputID < 1 || inputID > GetHighestProductID())
+            {
+                if (inputID < 1 || inputID > GetHighestProductID())
+                {
+                    Console.Write($"Felaktig inmating. Produkt-ID måste vara mellan 1-{GetHighestProductID()}: ");
+                    inputID = CheckInt();
+                }
+            }
                         
+            foreach (var findItem in productList)
+            {
+                if (inputID == findItem.GetId())
+                {
+                    Console.WriteLine($"\nID: {findItem.GetId()}\nNAMN: {findItem.GetProductName()}\nPRIS: {findItem.GetPrice()} kr\n");
+                }
+            }
+
+            Console.WriteLine("Vad vill du ändra? \n1. Namn\n2. Pris\n\n3.Återgå\n");
+            var inputChoice = CheckInt();
+
+            if (inputChoice < 1 || inputChoice > 3)
+            {
+                while (inputChoice < 1 || inputChoice > 3)
+                {
+                    Console.Write("Felaktig inmatning. Välj 1, 2 eller 3: ");
+                    inputChoice = CheckInt();
+                }
+            }
+
+            if (inputChoice == 1)
+            {
+                Console.Write("Nytt produktnamn: ");
+                var productname = Console.ReadLine();
+                foreach (var product in productList)
+                {
+                    if (inputID == product.GetId())
+                    {
+                        product.SetProductName(productname);
+                        Console.Clear();
+                        AdminMenu();
+                    }
+                }
+            }
+            else if (inputChoice == 2)
+            {
+                Console.Write("Nytt pris: ");
+                decimal price = CheckDecimalInput();
+                foreach (var product in productList)
+                {
+                    if (inputID == product.GetId())
+                    {
+                        product.SetProductPrice(price);
+                        Console.Clear();
+                        AdminMenu();
+                    }
+                }
+            }
+            else if (inputChoice == 3)
+            {
+                Console.Clear();
+                AdminMenu();
+            }
+
+            
+        }
+        void Cashier()
+        {
+            paymentNumber = GetDateNow();
+            Console.WriteLine("KASSA");
+            Console.WriteLine($"KVITTO\t{paymentNumber}");
+            string? checkInput = "";
+            decimal totalSum = 0;
+                        
+            while (true)
+            {
+                Console.Write("\nAnge produktkod mellanslag antal: ");
+                checkInput = Console.ReadLine();
+                (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
+                var name = GetTheName(produktKodCashier);
+                var eachPrice = CheckCampaign(produktKodCashier);
+                var payment = GetTheSum(produktKodCashier, quantityCashier);
+                totalSum += payment;
+
+                var newReceiptLine = new Receipt(paymentNumber, produktKodCashier, name, quantityCashier, eachPrice, payment, totalSum);
+                receiptList.Add(newReceiptLine);
+                Console.Clear();
+                Console.WriteLine("KASSA");
+                Console.WriteLine($"KVITTO\t{paymentNumber}");
+
+                foreach (var receiptLines in receiptList)
+                {
+                    Console.WriteLine($"{receiptLines.GetProductName()} {receiptLines.GetQuantityCashier()} * {receiptLines.GetEachPrice().ToString("N2")} = {receiptLines.GetPayment().ToString("N2")}");
+                }
+                Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
+            }
+        }
+
+        void SaveKvittonummerToFile(CompleteReceipts completeReceipts, DateTime dateTime, decimal totalSum)
+        {
+            int receiptNumberFromFile = 0;
+
+            var srRecNr = new StreamReader("ReceiptCounter.txt");
+            using (srRecNr)
+            {
+                if (srRecNr.Peek() == -1)
+                {
+                    receiptNumberFromFile = 0;
+                }
+                else
+                {
+                    receiptNumberFromFile = int.Parse(srRecNr.ReadToEnd())+1;
+                }
+            }
+
+
+            var swRecNr = new StreamWriter("ReceiptCounter.txt", false);
+            using (swRecNr)
+            {
+                swRecNr.WriteLine(receiptNumberFromFile);
+            }
+
+            var sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine($"KVITTONUMMER: {receiptNumberFromFile}");
+                sw.WriteLine("");
+                sw.WriteLine($"{dateTime}");
+                sw.WriteLine("");
+            }
+            
+            foreach (var receiptLine in receiptList)
+            {
+                SaveReceiptLinesToFile(receiptLine);
+            }
+            
+            sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine("");
+                sw.WriteLine($"Total: {totalSum.ToString("N2")} kr");
+                sw.WriteLine("-----------------------");
+                sw.WriteLine("");
+            }
+        }
+
+        void SaveReceiptLinesToFile(Receipt receipt)
+        {
+            var sw = new StreamWriter("ReceiptFile.txt", true);
+            using (sw)
+            {
+                sw.WriteLine($"{receipt.GetProductName()} {receipt.GetQuantityCashier()} * {receipt.GetEachPrice().ToString("N2")} = {receipt.GetPayment().ToString("N2")}");
+            }
+        }
+
         (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
         {
             bool validInput = false;
