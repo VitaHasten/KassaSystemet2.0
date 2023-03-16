@@ -31,9 +31,7 @@ namespace KassaSystemet2._0
         int freeCampaignId = GetFreeCampaignId();
         static int receiptNumber = 0;
         static List<CompleteReceipts> ListOfAllReceipts = new List<CompleteReceipts>();
-        bool goToMainMenu = false;
-        bool cashierDone = false;
-        
+                
         void AddingStartupProducts()
         {
             var newProduct = new Product(freeId, "Morötter", 19.90M, Enhet.Kilopris);
@@ -101,6 +99,7 @@ namespace KassaSystemet2._0
 
         void AdminMenu()
         {
+            bool goToMainMenu = false;
             while (goToMainMenu != true)
             {
                 Console.Clear();      
@@ -300,9 +299,10 @@ namespace KassaSystemet2._0
             string? checkInput = "";
             decimal totalSum = 0;
                         
-            while (cashierDone != true)
+            while (true)
             {
-                Console.Write("\nAnge produktkod mellanslag antal: ");
+                Console.WriteLine("\nKommandon:\n<productid> <antal>\nPAY");
+                Console.Write("Kommando: ");
                 checkInput = Console.ReadLine();
                 (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
                 var name = GetTheName(produktKodCashier);
@@ -320,7 +320,7 @@ namespace KassaSystemet2._0
                 {
                     Console.WriteLine($"{receiptLines.GetProductName()} {receiptLines.GetQuantityCashier()} * {receiptLines.GetEachPrice().ToString("N2")} = {receiptLines.GetPayment().ToString("N2")}");
                 }
-                Console.Write($"\nTotal: {totalSum.ToString("N2")} kr\n");
+                Console.Write($"Total: {totalSum.ToString("N2")}\n");
             }
         }
                 
@@ -381,7 +381,7 @@ namespace KassaSystemet2._0
 
         decimal GetThePrice(int produktKodCashier)
         {
-            foreach (var price in productList)
+            foreach (var price in productList) 
             {
                 if (produktKodCashier == price.GetId())
                 {
@@ -426,7 +426,7 @@ namespace KassaSystemet2._0
             return dateNow;
         }
 
-        bool Receipt(decimal totalSum)
+        void Receipt(decimal totalSum)
         {
             while (true)
             {
@@ -437,8 +437,8 @@ namespace KassaSystemet2._0
                 ListOfAllReceipts.Add(completeReceipt);
                 receiptList.Clear();
                 Console.Clear();
-                cashierDone = true;
-                return cashierDone;                
+                MainMenu();
+                break;                
             }
         }
 
