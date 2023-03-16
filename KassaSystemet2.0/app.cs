@@ -301,10 +301,28 @@ namespace KassaSystemet2._0
                         
             while (true)
             {
-                Console.WriteLine("\nKommandon:\n<productid> <antal>\nPAY");
-                Console.Write("Kommando: ");
-                checkInput = Console.ReadLine();
-                (int produktKodCashier, int quantityCashier) = GetTwoIntegers(checkInput, totalSum);
+
+                bool validInput = false;
+                int produktKodCashier = 0;
+                int quantityCashier = 0;
+                while (!validInput)
+                {
+                    Console.WriteLine("\nKommandon:\n<productid> <antal>\nPAY");
+                    Console.Write("Kommando: ");
+                    checkInput = Console.ReadLine();
+                    if (checkInput.ToUpper() == "PAY" && receiptList.Count > 0)
+                    {
+                        Receipt(totalSum);
+                        return;
+                    }
+                    (produktKodCashier, quantityCashier, validInput) = GetTwoIntegers(checkInput, totalSum);
+
+                    if(!validInput)
+                    {
+                        Console.WriteLine("\nFELAKTIG INMATNING");
+                    }
+                }
+                
                 var name = GetTheName(produktKodCashier);
                 var eachPrice = CheckCampaign(produktKodCashier);
                 var payment = GetTheSum(produktKodCashier, quantityCashier);
@@ -324,53 +342,34 @@ namespace KassaSystemet2._0
             }
         }
                 
-        (int, int) GetTwoIntegers(string checkInput, decimal totalSum)
+        (int, int, bool) GetTwoIntegers(string checkInput, decimal totalSum)
         {
             bool validInput = false;
             int integer1 = 0;
             int integer2 = 0;
 
-            while (!validInput)
+            if (!checkInput.Contains(" "))
             {
-                if (checkInput.ToUpper() == "PAY" && receiptList.Count > 0)
-                {
-                    Receipt(totalSum);
-                }
-                if (!checkInput.Contains(" "))
-                {
-                    Console.WriteLine("\nFELAKTIG INMATNING");
-                    Console.Write("\nAnge produktkod mellanslag antal: ");
-                    checkInput = Console.ReadLine();
-                    continue;
-                }
-
-                int mellanslagsIndex = checkInput.IndexOf(" ");
-                string inputDigits1 = checkInput[..mellanslagsIndex];
-                string inputDigits2 = checkInput[(mellanslagsIndex + 1)..];
-
-                if (!int.TryParse(inputDigits1, out integer1) || !int.TryParse(inputDigits2, out integer2))
-                {
-                    Console.WriteLine("\nFELAKTIG INMATNING");
-                    Console.Write("\nAnge produktkod mellanslag antal: ");
-                    checkInput = Console.ReadLine();
-                    continue;
-                }
-                
-                integer1 = int.Parse(inputDigits1);
-                integer2 = int.Parse(inputDigits2);
-
-                if (!productList.Any(product => product.GetId() == integer1))
-                {
-                    Console.WriteLine("\nFELAKTIG INMATNING");
-                    Console.Write("\nAnge produktkod mellanslag antal: ");
-                    checkInput = Console.ReadLine();
-                    continue; 
-                }
-
-                validInput = true;
+                return (0, 0, false);
             }
 
-            return (integer1, integer2);
+            int mellanslagsIndex = checkInput.IndexOf(" ");
+            string inputDigits1 = checkInput[..mellanslagsIndex];
+            string inputDigits2 = checkInput[(mellanslagsIndex + 1)..];
+
+            if (!int.TryParse(inputDigits1, out integer1) || !int.TryParse(inputDigits2, out integer2))
+            {
+                return (0, 0, false);
+            }
+                
+            integer1 = int.Parse(inputDigits1);
+            integer2 = int.Parse(inputDigits2);
+
+            if (!productList.Any(product => product.GetId() == integer1))
+            {
+                return (0, 0, false); 
+            }
+            return (integer1, integer2, true);
         }
 
         decimal GetTheSum(int produktKodCashier, int quantity)
@@ -437,7 +436,6 @@ namespace KassaSystemet2._0
                 ListOfAllReceipts.Add(completeReceipt);
                 receiptList.Clear();
                 Console.Clear();
-                MainMenu();
                 break;                
             }
         }
