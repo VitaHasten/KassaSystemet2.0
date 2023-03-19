@@ -69,7 +69,7 @@ namespace KassaSystemet2._0
                 Console.Clear();
                 Console.WriteLine("***KASSASYSTEMET***\n");
                 Console.WriteLine("1. Adminmeny");
-                Console.WriteLine("2. Kassan");
+                Console.WriteLine("2. Ny kund");
                 Console.WriteLine("3. Kontrollera kvitton\n");
                 Console.WriteLine("9. AVSLUTA\n");
                         
@@ -621,7 +621,7 @@ namespace KassaSystemet2._0
                 }
                 if (val != 1 && val != 2 && val != 3 && val != 4 && val != 9)
                 {
-                    Console.WriteLine("\nFelaktig inmatning. Ditt val måste vara 1, 2, 3, 4 eller 9.\n");
+                    Console.WriteLine("\nFelaktig inmatning. Ditt val måste vara 1, 2, 3, eller 9.\n");
                     continue;
                 }
                 exit = "exit";
